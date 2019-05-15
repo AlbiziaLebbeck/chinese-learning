@@ -15,8 +15,8 @@ class Header extends React.Component {
                 <Card className="card-stats mb-4 mb-xl-0">
                   <CardBody>
                     {/* Progess */}
-                    <div className="text-center">2/10</div>
-                    <Progress value={2/10*100}/>
+                    <div className="text-center">{this.props.score}/10</div>
+                    <Progress value={this.props.score/10*100}/>
                   </CardBody>
                 </Card>
               </Col>

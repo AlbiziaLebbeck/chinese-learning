@@ -5,7 +5,7 @@ import Quiz from "views/Quiz.jsx";
 import Register from "views/examples/Register.jsx";
 import Login from "views/examples/Login.jsx";
 // import Tables from "views/examples/Tables.jsx";
-// import Icons from "views/examples/Icons.jsx";
+import Icons from "views/examples/Icons.jsx";
 
 var routes = [
   {
@@ -29,13 +29,13 @@ var routes = [
   //   component: Index,
   //   layout: "/admin"
   // },
-  // {
-  //   path: "/icons",
-  //   name: "Icons",
-  //   icon: "ni ni-planet text-blue",
-  //   component: Icons,
-  //   layout: "/admin"
-  // },
+  {
+    path: "/icons",
+    name: "Icons",
+    icon: "ni ni-planet text-blue",
+    component: Icons,
+    layout: "/admin"
+  },
   // {
   //   path: "/maps",
   //   name: "Maps",
