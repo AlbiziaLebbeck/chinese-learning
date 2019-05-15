@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardFooter,
   CardBody,
+  CardTitle,
   Container,
   Row,
   Col
@@ -46,6 +47,7 @@ class Quiz extends React.Component {
       answerOption: [],
       selectedAnswers: {},
       checkAnswer: 0,
+      numQuestions: 0,
       score: 0,
     };
 
@@ -61,7 +63,8 @@ class Quiz extends React.Component {
   componentWillMount() {
     this.setState({
       question: this.quizQuestions[0].question,
-      answerOptions : this.shuffledAnswerOptions[0],
+      answerOptions: this.shuffledAnswerOptions[0],
+      numQuestions: this.quizQuestions.length,
     });
   }
 
@@ -85,17 +88,20 @@ class Quiz extends React.Component {
     return array;
   }
 
-  onAnswerSelected(answer,index) {
-    var obj = this.state.selectedAnswers;
-    console.log("for selected question number " + (this.state.questionID + 1) +  " answer is " + index + "," + answer);
-    obj[this.state.questionID] = index;
-    this.setState({selectedAnswers: obj});
+  onAnswerSelected(answer,index){ 
+    const e = () => {
+      const obj = this.state.selectedAnswers;
+      console.log("for selected question number " + (this.state.questionID + 1) +  " answer is " + index + "," + answer);
+      obj[this.state.questionID] = index;
+      this.setState({selectedAnswers: obj});
+    }
+    return e;
   }
 
   onCheck() {
-    var obj = this.state.selectedAnswers[this.state.questionID];
-    var answer = this.quizQuestions[this.state.questionID].answer;
-    var score = this.state.score;
+    const obj = this.state.selectedAnswers[this.state.questionID];
+    const answer = this.quizQuestions[this.state.questionID].answer;
+    const score = this.state.score;
     if(obj !== undefined){
       if(this.state.answerOptions[obj] == answer){
         this.setState({checkAnswer: 1, score: score + 1});
@@ -107,12 +113,21 @@ class Quiz extends React.Component {
   }
 
   onNextQuestion() {
-    const id = (this.state.questionID + 1)%3;
+    const obj = this.state.selectedAnswers;
+    if(this.state.checkAnswer == 2) {
+      delete obj[this.state.questionID];
+    }
+
+    let id = (this.state.questionID + 1)%3;
+    while(obj[id] != undefined){
+      id = (id + 1)%3;
+    }
 
     this.setState({
       questionID: id,
       question: this.quizQuestions[id].question,
-      answerOptions : this.shuffledAnswerOptions[id],
+      answerOptions: this.shuffledAnswerOptions[id],
+      selectedAnswers: obj,
       checkAnswer: 0,
     });
   }
@@ -141,30 +156,33 @@ class Quiz extends React.Component {
               </Card>
             </Col>
             <Col lg="6" xl="4">
-              {this.state.answerOptions.map((answer,index) => 
+              {
+                this.state.answerOptions.map((answer,index) => 
                   <Button outline block 
                     color={this.state.checkAnswer != 0 && this.quizQuestions[this.state.questionID].answer === answer? "success" : 
                     this.state.checkAnswer == 2 && this.state.selectedAnswers[this.state.questionID] === index ? "danger" :"primary"}  
-                    onClick={() => this.state.checkAnswer == 0 ? this.onAnswerSelected(answer,index) : null}
+                    onClick={this.state.checkAnswer == 0 ? this.onAnswerSelected(answer,index) : null}
                     active={this.state.selectedAnswers[this.state.questionID] === index || (this.state.checkAnswer == 2 && this.quizQuestions[this.state.questionID].answer === answer)}>
-                    {answer}            
-                  </Button>
-              )}
+                    {answer}</Button>
+                )
+              }
             </Col>
           </Row>
         </CardBody>
         <CardFooter className="text-muted">
           {/* Answer */}
           <div className="clearfix">
-            {this.state.checkAnswer == 0 ?
-              (<Button className="float-left" size="lg" onClick={() => this.onNextQuestion()}>ข้าม</Button>) : 
-              this.state.checkAnswer == 1 ?
-              (<FaRegThumbsUp color='#2ADF5F' size={50} />):(<FaRegThumbsDown color='#EF233C' size={50} />)}
-            {this.state.checkAnswer == 0 ? 
-              (<Button className="float-right" color="info" size="lg" onClick={() => this.onCheck()}>ตรวจสอบ</Button>) : 
-              (<Button className="float-right" size="lg" onClick={() => this.onNextQuestion()}
-                color={this.state.checkAnswer == 1 ? ("success") : ("danger")}>ข้อถัดไป
-              </Button>)
+            {
+              this.state.checkAnswer == 0 ?
+                (<Button className="float-left" size="lg" onClick={this.onNextQuestion}>ข้าม</Button>) : 
+                this.state.checkAnswer == 1 ?
+                  (<FaRegThumbsUp color="#2ADF5F" size={50} />):(<FaRegThumbsDown color='#EF233C' size={50} />)
+            }
+            {
+              this.state.checkAnswer == 0 ? 
+                (<Button className="float-right" color="info" size="lg" onClick={this.onCheck}>ตรวจสอบ</Button>) : 
+                (<Button className="float-right" size="lg" onClick={this.onNextQuestion}
+                  color={this.state.checkAnswer == 1 ? ("success") : ("danger")}>ข้อถัดไป</Button>)
             }
           </div>
         </CardFooter>
@@ -172,15 +190,27 @@ class Quiz extends React.Component {
     );
   }
 
+  renderResult() {
+    return(
+      <Card body className="shadow text-center">
+        <CardTitle tag="h1">ยินดีด้วย!! คุณทำได้ดีมาก</CardTitle>
+        <CardBody>
+          <FaRegThumbsUp color="#2A5FDF" size={200} />
+        </CardBody>
+        <Button color="success" size="lg">แบบทดสอบถัดไป</Button>
+      </Card>
+    );
+  }
+
   render() {
     return (
       <>
-        <Header score={this.state.score} />
+        <Header score={this.state.score} numQuestions={this.state.numQuestions}/>
         {/* Page content */}
         <Container className="mt--7" fluid>
           <Row>
             <Col>
-              {this.renderQuiz()}
+              {this.state.score < this.state.numQuestions ? this.renderQuiz() : this.renderResult()}
             </Col>
           </Row>
         </Container>
